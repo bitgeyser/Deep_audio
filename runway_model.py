@@ -11,32 +11,32 @@ from tqdm import tqdm
 from pytorch_pretrained_biggan import (BigGAN, one_hot_from_names, truncated_noise_sample,
                                        save_as_images, display_in_terminal)
 
-+ @runway.setup(options={"checkpoint": runway.category(description="Pretrained checkpoints to use.",
-+                                      choices=['celebAHQ-512', 'celebAHQ-256', 'celeba'],
-+                                      default='celebAHQ-512')})
-+ def setup(opts):
-+   checkpoint = opts['checkpoint']
-+                          'PGAN', model_name=checkpoint,
+ @runway.setup(options={"checkpoint": runway.category(description="Pretrained checkpoints to use.",
+                                      choices=['celebAHQ-512', 'celebAHQ-256', 'celeba'],
+                                      default='celebAHQ-512')})
+ def setup(opts):
+   checkpoint = opts['checkpoint']
+                          'PGAN', model_name=checkpoint,
  return model
 
-+ @runway.command('generate',
-+               inputs={ 'z': runway.vector(length=512, sampling_std=0.5)},
-+               outputs={ 'image': runway.image })
-+  def generate(model, inputs):
-+  # Generate ♾ infinite ♾ images
-+   z = inputs['z']
-+   latents = z.reshape((1, 559))
-+   latents = torch.from_numpy(latents)
+ @runway.command('generate',
+               inputs={ 'z': runway.vector(length=512, sampling_std=0.5)},
+               outputs={ 'image': runway.image })
+  def generate(model, inputs):
+  # Generate ♾ infinite ♾ images
+   z = inputs['z']
+   latents = z.reshape((1, 559))
+   latents = torch.from_numpy(latents)
 -   noise, _ = model.buildNoiseData(1)
     with torch.no_grad():
-+       generated_image = model.test(latents.float())
-+   generated_image = generated_image.clamp(min=-1, max=1)
-+   generated_image = ((generated_image + 1.0) * 255 / 2.0)
+       generated_image = model.test(latents.float())
+   generated_image = generated_image.clamp(min=-1, max=1)
+   generated_image = ((generated_image + 1.0) * 255 / 2.0)
     # Now generated_image contains our generated image! 🌞
-+   return generated_image[0].permute(1, 2, 0).numpy().astype(np.uint8)
+   return generated_image[0].permute(1, 2, 0).numpy().astype(np.uint8)
 
-+ if __name__ == '__main__':
-+    runway.run(port=5232)
+ if __name__ == '__main__':
+    runway.run(port=5232)
 
 
 
