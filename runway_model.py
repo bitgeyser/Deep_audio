@@ -4,8 +4,8 @@ import numpy as np
 import moviepy.editor as mpy
 import random
 import torch
-+ import runway
-+ import numpy as np
+import runway
+import numpy as np
 from scipy.misc import toimage
 from tqdm import tqdm
 from pytorch_pretrained_biggan import (BigGAN, one_hot_from_names, truncated_noise_sample,
@@ -16,6 +16,28 @@ from pytorch_pretrained_biggan import (BigGAN, one_hot_from_names, truncated_noi
 +                                      default='celebAHQ-512')})
 + def setup(opts):
 +   checkpoint = opts['checkpoint']
++                          'PGAN', model_name=checkpoint,
+ return model
+
++ @runway.command('generate',
++               inputs={ 'z': runway.vector(length=512, sampling_std=0.5)},
++               outputs={ 'image': runway.image })
++  def generate(model, inputs):
++  # Generate ♾ infinite ♾ images
++   z = inputs['z']
++   latents = z.reshape((1, 559))
++   latents = torch.from_numpy(latents)
+-   noise, _ = model.buildNoiseData(1)
+    with torch.no_grad():
++       generated_image = model.test(latents.float())
++   generated_image = generated_image.clamp(min=-1, max=1)
++   generated_image = ((generated_image + 1.0) * 255 / 2.0)
+    # Now generated_image contains our generated image! 🌞
++   return generated_image[0].permute(1, 2, 0).numpy().astype(np.uint8)
+
++ if __name__ == '__main__':
++    runway.run(port=5232)
+
 
 
 #get input arguments
@@ -105,8 +127,7 @@ else:
 # Load pre-trained model
 model = BigGAN.from_pretrained(model_name)
 
-+                          'PGAN', model_name=checkpoint,
-+   return model
+
 
 #set device
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
